@@ -9,7 +9,7 @@ public class PlaySim {
     private static int fitaEsquerda = 20;
     private static ArrayList<Character> fita;
     private static char simboloAtual;
-    private static boolean flagParaMT = false;
+    private static boolean flagParaMT = true;
 
     public static void startSim(ArrayList<EstadosMT> MT, int limComputacao, int limThread, String palavraEntrada, int estadoInicial){
 
@@ -89,44 +89,39 @@ public class PlaySim {
 
     private static void iniciaSimulacao(ArrayList<EstadosMT> MT, int limComputacao, int limThread, String palavraEntrada, int estadoAtual){
 
+        int i=0;
+
         do{
 
             simboloAtual = fita.get(fita.indexOf('(') + 1);
 
-            //percorre o vetor de estados da maquina
-            for(int i = 0; i < MT.size(); i++){
+            //verifica se o  estado é o estado atual
+            if(MT.get(i).getEstadoAtual() == estadoAtual){
 
-                flagParaMT = true;
+                if(MT.get(i).getEstadoFinal()){
 
-                //verifica se o  estado é o estado atual
-                if(MT.get(i).getEstadoAtual() == estadoAtual){
-
-                    if(MT.get(i).getEstadoFinal()){
-                        flagParaMT = false;
-                        break;
-                    }
-
-                    //verifica se o estado da maquina tem movimento com o simbolo atual
-                    if(MT.get(i).getSimboloAtual() == simboloAtual || MT.get(i).getSimboloAtual() == '*'){
-
-                        if (MT.get(i).getSimboloAtual() == '*'){
-                            simboloAtual = fita.get(fita.indexOf('(') + 1);
-                        }
-
-                        atualizaFita(MT.get(i).getMovimento(), MT.get(i).getNovoSimbolo());
-                        estadoAtual = MT.get(i).getNovoEstado();
-                        printaFita();
-
-                    }else{
-
-                        //no estado nao existe a trasição
-                        flagParaMT = false;
-                    }
-                }else{
-
-                    //nao encontro um estado
                     flagParaMT = false;
                 }
+
+                //verifica se o estado da maquina tem movimento com o simbolo atual
+                if(MT.get(i).getSimboloAtual() == simboloAtual || MT.get(i).getSimboloAtual() == '*'){
+
+                    if (MT.get(i).getSimboloAtual() == '*'){
+
+
+                        simboloAtual = fita.get(fita.indexOf('(') + 1);
+                    }
+
+                    atualizaFita(MT.get(i).getMovimento(), MT.get(i).getNovoSimbolo());
+                    estadoAtual = MT.get(i).getNovoEstado();
+                    printaFita();
+
+                }
+            }
+
+            i++;
+            if (i == MT.size()){
+                flagParaMT = false;
             }
         }while(flagParaMT);
 
