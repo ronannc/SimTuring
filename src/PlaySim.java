@@ -15,9 +15,9 @@ public class PlaySim {
 
         iniciaFita(palavraEntrada);
 
-        printaFita();
+        printaFita(estadoInicial);
 
-        iniciaSimulacao(MT, limComputacao, limThread, palavraEntrada, estadoInicial);
+        iniciaSimulacao(MT, limComputacao, limThread, estadoInicial);
     }
 
     private static void iniciaFita(String palavraEntrada){
@@ -91,11 +91,12 @@ public class PlaySim {
         }
     }
 
-    private static void iniciaSimulacao(ArrayList<EstadosMT> MT, int limComputacao, int limThread, String palavraEntrada, int estadoAtual){
+    private static void iniciaSimulacao(ArrayList<EstadosMT> MT, int limComputacao, int limThread, int estadoAtual){
 
         int i=0;
         boolean flagAux = false;
         int aux = 0;
+        int cont = 0;
 
         do{
 
@@ -104,9 +105,11 @@ public class PlaySim {
             //verifica se o  estado é o estado atual
             if(MT.get(i).getEstadoAtual() == estadoAtual){
 
+
                 if(MT.get(i).getEstadoFinal()){
 
                     flagParaMT = false;
+                    System.out.println(MT.get(i).getEstadoAtual()+": Aceita");
                 }
 
                 //verifica se o estado da maquina tem movimento com o simbolo atual
@@ -114,8 +117,9 @@ public class PlaySim {
                     flagAux = false;
                     atualizaFita(MT.get(i).getMovimento(), MT.get(i).getNovoSimbolo());
                     estadoAtual = MT.get(i).getNovoEstado();
-                    printaFita();
+                    printaFita(MT.get(i).getEstadoAtual());
                     i = 0;
+                    cont ++;
                 }else if(MT.get(i).getSimboloAtual() == '*') {
                     flagAux = true;
                     aux = i;
@@ -128,18 +132,29 @@ public class PlaySim {
                 if(flagAux){
                     atualizaFita(MT.get(aux).getMovimento(), MT.get(aux).getNovoSimbolo());
                     estadoAtual = MT.get(aux).getNovoEstado();
-                    printaFita();
+                    printaFita(MT.get(aux).getEstadoAtual());
                     i = 0;
                     aux = 0;
+                    cont ++;
                 }else {
                     flagParaMT = false;
+                    System.out.println("Erro - Nao aceita");
                 }
+            }
+
+            if(cont == limComputacao){
+                flagParaMT = false;
+                System.out.println("Limite de computação");
             }
         }while(flagParaMT);
 
     }
 
-    private static void printaFita(){
+    private static void printaFita(int estado){
+
+
+
+        System.out.print(estado+": ");
 
         for (Character caractere: fita) {
             System.out.print(caractere);
