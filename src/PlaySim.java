@@ -47,6 +47,10 @@ public class PlaySim {
         int auxIndex;
         char auxSwap;
 
+        if(novoSimbolo == '*'){
+            novoSimbolo = fita.get(fita.indexOf('(') + 1);
+        }
+
         if(movimento == 'd'){
 
             auxIndex = fita.indexOf('(');
@@ -90,6 +94,8 @@ public class PlaySim {
     private static void iniciaSimulacao(ArrayList<EstadosMT> MT, int limComputacao, int limThread, String palavraEntrada, int estadoAtual){
 
         int i=0;
+        boolean flagAux = false;
+        int aux = 0;
 
         do{
 
@@ -104,24 +110,30 @@ public class PlaySim {
                 }
 
                 //verifica se o estado da maquina tem movimento com o simbolo atual
-                if(MT.get(i).getSimboloAtual() == simboloAtual || MT.get(i).getSimboloAtual() == '*'){
-
-                    if (MT.get(i).getSimboloAtual() == '*'){
-
-
-                        simboloAtual = fita.get(fita.indexOf('(') + 1);
-                    }
-
+                if(MT.get(i).getSimboloAtual() == simboloAtual){
+                    flagAux = false;
                     atualizaFita(MT.get(i).getMovimento(), MT.get(i).getNovoSimbolo());
                     estadoAtual = MT.get(i).getNovoEstado();
                     printaFita();
-
+                    i = 0;
+                }else if(MT.get(i).getSimboloAtual() == '*') {
+                    flagAux = true;
+                    aux = i;
                 }
+
             }
 
             i++;
             if (i == MT.size()){
-                flagParaMT = false;
+                if(flagAux){
+                    atualizaFita(MT.get(aux).getMovimento(), MT.get(aux).getNovoSimbolo());
+                    estadoAtual = MT.get(aux).getNovoEstado();
+                    printaFita();
+                    i = 0;
+                    aux = 0;
+                }else {
+                    flagParaMT = false;
+                }
             }
         }while(flagParaMT);
 
