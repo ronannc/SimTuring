@@ -1,3 +1,5 @@
+import sun.awt.windows.ThemeReader;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -42,6 +44,10 @@ public class SimTuring {
         //recebe a palavra de entrada
         palavra = EntradaDeDados.recebePalavra();
 
-        PlaySim.startSim(MT, limComputacao, limThreads, palavra, 1);
+        ArrayList<Character> fita = PlaySim.iniciaFita(palavra);
+        PlaySim.printaFita(1, fita, false);
+        System.out.println();
+
+        new Thread(new PlaySim(MT, limComputacao, limThreads, 1, fita, true)).start();
     }
 }

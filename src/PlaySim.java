@@ -1,28 +1,34 @@
+import com.sun.org.apache.xpath.internal.SourceTree;
+
 import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  * Created by ronan on 21/06/2017.
  */
-public class PlaySim {
+public class PlaySim implements Runnable{
 
     private static int fitaDireita = 20;
     private static int fitaEsquerda = 20;
-    private static ArrayList<Character> fita;
-    private static char simboloAtual;
-    private static boolean flagParaMT = true;
+    private static int limThreadClass;
+    private static int limComputacaoClass;
+    private ArrayList<EstadosMT> MTclass;
 
-    public static void startSim(ArrayList<EstadosMT> MT, int limComputacao, int limThread, String palavraEntrada, int estadoInicial){
+    private MomentoMT mMT = new MomentoMT();
 
-        iniciaFita(palavraEntrada);
+    public PlaySim(ArrayList<EstadosMT> MTclass,int limComputacao, int limThread, int estadoInicial, ArrayList<Character> fita, boolean flag){
 
-        printaFita(estadoInicial);
-
-        iniciaSimulacao(MT, limComputacao, limThread, estadoInicial);
+        this.mMT.setEstadoAtualClass(estadoInicial);
+        this.limThreadClass = limThread;
+        this.limComputacaoClass = limComputacao;
+        this.mMT.setFitaClass((ArrayList<Character>) fita.clone());
+        this.mMT.setFlagParaMT(flag);
+        this.MTclass = MTclass;
     }
 
-    private static void iniciaFita(String palavraEntrada){
+    public static ArrayList<Character> iniciaFita(String palavraEntrada){
 
-        fita = new ArrayList<Character>();
+        ArrayList<Character> fita = new ArrayList<Character>();
 
         for(int i = 0; i < fitaEsquerda+fitaDireita+2+palavraEntrada.length();i++){
 
@@ -40,126 +46,240 @@ public class PlaySim {
                 fita.add('_');
             }
         }
+        System.out.println("fita inicial");
+        return fita;
     }
 
-    private static void atualizaFita(char movimento, char novoSimbolo){
+    private void atualizaFita(char movimento, char novoSimbolo, ArrayList<Character> AUXfitaClass){
 
         int auxIndex;
         char auxSwap;
 
         if(novoSimbolo == '*'){
-            novoSimbolo = fita.get(fita.indexOf('(') + 1);
+            novoSimbolo = AUXfitaClass.get(AUXfitaClass.indexOf('(') + 1);
         }
 
         if(movimento == 'd'){
 
-            auxIndex = fita.indexOf('(');
+            auxIndex = AUXfitaClass.indexOf('(');
 
-            fita.set(auxIndex + 1, novoSimbolo);
-            auxSwap = fita.get(auxIndex + 1);
+            AUXfitaClass.set(auxIndex + 1, novoSimbolo);
+            auxSwap = AUXfitaClass.get(auxIndex + 1);
 
-            fita.set(auxIndex + 1, '(');
-            fita.set(auxIndex, auxSwap);
+            AUXfitaClass.set(auxIndex + 1, '(');
+            AUXfitaClass.set(auxIndex, auxSwap);
 
-            auxIndex = fita.indexOf(')');
-            auxSwap = fita.get(auxIndex + 1);
+            auxIndex = AUXfitaClass.indexOf(')');
+            auxSwap = AUXfitaClass.get(auxIndex + 1);
 
-            fita.set(auxIndex + 1, ')');
-            fita.set(auxIndex, auxSwap);
+            AUXfitaClass.set(auxIndex + 1, ')');
+            AUXfitaClass.set(auxIndex, auxSwap);
 
         }else if(movimento == 'e'){
 
-            auxIndex = fita.indexOf('(');
+            auxIndex = AUXfitaClass.indexOf('(');
 
-            fita.set(auxIndex + 1, novoSimbolo);
-            auxSwap = fita.get(auxIndex - 1);
+            AUXfitaClass.set(auxIndex + 1, novoSimbolo);
+            auxSwap = AUXfitaClass.get(auxIndex - 1);
 
-            fita.set(auxIndex - 1, '(');
-            fita.set(auxIndex, auxSwap);
+            AUXfitaClass.set(auxIndex - 1, '(');
+            AUXfitaClass.set(auxIndex, auxSwap);
 
-            auxIndex = fita.indexOf(')');
-            auxSwap = fita.get(auxIndex - 1);
+            auxIndex = AUXfitaClass.indexOf(')');
+            auxSwap = AUXfitaClass.get(auxIndex - 1);
 
-            fita.set(auxIndex - 1, ')');
-            fita.set(auxIndex, auxSwap);
+            AUXfitaClass.set(auxIndex - 1, ')');
+            AUXfitaClass.set(auxIndex, auxSwap);
 
         }else if(movimento == 'i'){
 
-            auxIndex = fita.indexOf('(');
+            auxIndex = AUXfitaClass.indexOf('(');
 
-            fita.set(auxIndex + 1, novoSimbolo);
+            AUXfitaClass.set(auxIndex + 1, novoSimbolo);
         }
     }
 
-    private static void iniciaSimulacao(ArrayList<EstadosMT> MT, int limComputacao, int limThread, int estadoAtual){
+    private void executaTransacao(int i, ArrayList<EstadosMT> MT, ArrayList<Character> fita, boolean ND){
 
-        int i=0;
-        boolean flagAux = false;
-        int aux = 0;
-        int cont = 0;
+        atualizaFita(MT.get(i).getMovimento(), MT.get(i).getNovoSimbolo(), fita);
+        printaFita(MT.get(i).getEstadoAtual(), fita, ND);
+    }
+
+    @Override
+    public void run(){
+
+        int auxindex;
+
+        int auxEstadoAtual;
+        ArrayList<Character> auxFitaAtual;
+
+        char simboloAtual;
+        int transicao = 0;
+
+        Stack pilhaTransicao = new Stack();
+        Stack pilhaTransicaoCoringa = new Stack();
 
         do{
 
-            simboloAtual = fita.get(fita.indexOf('(') + 1);
+            simboloAtual = mMT.getFitaClass().get(mMT.getFitaClass().indexOf('(') + 1);
 
             //verifica se o  estado é o estado atual
-            if(MT.get(i).getEstadoAtual() == estadoAtual){
+            if(MTclass.get(transicao).getEstadoAtual() == mMT.getEstadoAtualClass()){
 
+                if(MTclass.get(transicao).getEstadoFinal()){
 
-                if(MT.get(i).getEstadoFinal()){
-
-                    flagParaMT = false;
-                    System.out.println(MT.get(i).getEstadoAtual()+": Aceita");
+                    System.out.println(MTclass.get(transicao).getEstadoAtual()+": Aceita");
+                    System.exit(1);
                 }
 
                 //verifica se o estado da maquina tem movimento com o simbolo atual
-                if(MT.get(i).getSimboloAtual() == simboloAtual){
-                    flagAux = false;
-                    atualizaFita(MT.get(i).getMovimento(), MT.get(i).getNovoSimbolo());
-                    estadoAtual = MT.get(i).getNovoEstado();
-                    printaFita(MT.get(i).getEstadoAtual());
-                    i = 0;
-                    cont ++;
-                }else if(MT.get(i).getSimboloAtual() == '*') {
-                    flagAux = true;
-                    aux = i;
-                }
+                if(MTclass.get(transicao).getSimboloAtual() == simboloAtual){
 
+                    pilhaTransicao.push(transicao);
+
+                }else if(MTclass.get(transicao).getSimboloAtual() == '*') {
+
+                    pilhaTransicaoCoringa.push(transicao);
+                }
             }
 
-            i++;
-            if (i == MT.size()){
-                if(flagAux){
-                    atualizaFita(MT.get(aux).getMovimento(), MT.get(aux).getNovoSimbolo());
-                    estadoAtual = MT.get(aux).getNovoEstado();
-                    printaFita(MT.get(aux).getEstadoAtual());
-                    i = 0;
-                    aux = 0;
-                    cont ++;
-                }else {
-                    flagParaMT = false;
+            transicao++;
+
+            if (transicao == MTclass.size()){
+
+                if(pilhaTransicao.size() == 1){
+
+                    auxindex = (int) pilhaTransicao.pop();
+
+                    executaTransacao(auxindex,MTclass, mMT.getFitaClass(), false);
+                    mMT.setEstadoAtualClass(MTclass.get(auxindex).getNovoEstado());
+
+                    limComputacaoClass--;
+                    transicao = 0;
+
+                    pilhaTransicao.clear();
+                    pilhaTransicaoCoringa.clear();
+
+                }else if(pilhaTransicao.size() > 1){
+
+                    auxEstadoAtual = mMT.getEstadoAtualClass();
+                    auxFitaAtual = (ArrayList<Character>) mMT.getFitaClass().clone();
+
+                    while(!pilhaTransicao.empty()){
+
+                        if(limThreadClass > 0 && limComputacaoClass > 0) {
+
+                            limComputacaoClass--;
+
+                            auxindex = (int) pilhaTransicao.pop();
+
+                            executaTransacao(auxindex, MTclass, mMT.getFitaClass(), true);
+                            mMT.setEstadoAtualClass(MTclass.get(auxindex).getNovoEstado());
+
+                            if(!pilhaTransicao.empty()){
+
+                                Runnable tr = new PlaySim(MTclass, limComputacaoClass, limThreadClass, mMT.getEstadoAtualClass(), (ArrayList<Character>) mMT.getFitaClass().clone(), true);
+                                Thread t = new Thread(tr);
+                                //System.out.println("nova trhead");
+                                t.start();
+                                limThreadClass--;
+                                mMT.setEstadoAtualClass(auxEstadoAtual);
+                                mMT.setFitaClass(auxFitaAtual);
+                            }
+
+
+                        }else {
+
+                            mMT.setFlagParaMT(false);
+                            //System.out.println("Limite de Thread");
+                            break;
+                        }
+                    }
+
+                    transicao = 0;
+                    pilhaTransicao.clear();
+                    pilhaTransicaoCoringa.clear();
+
+                }else if(pilhaTransicaoCoringa.size() == 1){
+
+                    auxindex = (int) pilhaTransicaoCoringa.pop();
+
+                    executaTransacao(auxindex,MTclass, mMT.getFitaClass(), false);
+                    mMT.setEstadoAtualClass(MTclass.get(auxindex).getNovoEstado());
+
+                    limComputacaoClass--;
+                    transicao = 0;
+                    pilhaTransicao.clear();
+                    pilhaTransicaoCoringa.clear();
+
+                }else if(pilhaTransicaoCoringa.size() > 1) {
+
+                    auxEstadoAtual = mMT.getEstadoAtualClass();
+                    auxFitaAtual = (ArrayList<Character>) mMT.getFitaClass().clone();
+
+                    while(!pilhaTransicaoCoringa.empty()){
+
+                        if(limThreadClass > 0 && limComputacaoClass > 0) {
+
+                            limComputacaoClass--;
+
+                            auxindex = (int) pilhaTransicaoCoringa.pop();
+
+                            executaTransacao(auxindex, MTclass, mMT.getFitaClass(), true);
+                            mMT.setEstadoAtualClass(MTclass.get(auxindex).getNovoEstado());
+
+                            if(!pilhaTransicaoCoringa.empty()){
+
+                                Runnable tr = new PlaySim(MTclass, limComputacaoClass, limThreadClass, mMT.getEstadoAtualClass(), (ArrayList<Character>) mMT.getFitaClass().clone(), true);
+                                Thread t = new Thread(tr);
+                                //System.out.println("nova trhead");
+                                t.start();
+                                limThreadClass--;
+                                mMT.setEstadoAtualClass(auxEstadoAtual);
+                                mMT.setFitaClass(auxFitaAtual);
+                            }
+
+                        }else {
+
+                            mMT.setFlagParaMT(false);
+                            //System.out.println("Limite de Thread");
+                            break;
+                        }
+                    }
+
+                    transicao = 0;
+                    pilhaTransicao.clear();
+                    pilhaTransicaoCoringa.clear();
+
+                }else{
+
+                    mMT.setFlagParaMT(false);
                     System.out.println("Erro - Nao aceita");
                 }
             }
 
-            if(cont == limComputacao){
-                flagParaMT = false;
+            if(limComputacaoClass == 0){
                 System.out.println("Limite de computação");
+                System.exit(0);
             }
-        }while(flagParaMT);
+
+        }while(mMT.getFlagParaMT());
 
     }
 
-    private static void printaFita(int estado){
+    public static void printaFita(int estado, ArrayList<Character> fita, boolean ND){
 
+        String aux;
 
-
-        System.out.print(estado+": ");
+        if(ND){
+            aux = "...N..."+estado+": ";
+        }else
+            aux = "......."+estado+": ";
 
         for (Character caractere: fita) {
-            System.out.print(caractere);
+            aux += caractere;
         }
 
-        System.out.println();
+        System.out.println(aux);
     }
 }

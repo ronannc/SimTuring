@@ -1,10 +1,23 @@
-; Detector de b∗ab∗ + c∗ac∗
-01 a −− s d 2
+;Palindrome
+01 a -- b d 02
+01 a -- c d 04
 
-02 b −− i d 3
+01 b -- b d 01
+01 c -- c d 01
+01 < -- < d 01
 
-03 a −− m e 5
+02 b -- b d 02
+02 _ -- _ e 03
 
-04 pare-aceita
+03 b -- b e 03
+03 < -- < d 06
 
-05 * -- * e 5
+04 c -- c d 04
+04 _ -- _ e 05
+
+05 c -- c e 05
+05 < -- < d 06
+
+06 pare-aceita
+
+
