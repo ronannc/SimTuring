@@ -11,10 +11,8 @@ public class EstadosMT {
     private char movimento;      // Movimento do cabeçote
     private int novoEstado;      // Estado de destino
     private boolean estadoFinal; // Se é estado final recebe true
-    private boolean breakPoint;  // Causa uma parada na execução
 
-
-    public EstadosMT(int estadoAtual, char simboloAtual, char novoSimbolo, char movimento, int novoEstado, boolean estadoFinal, boolean breakPoint) {
+    public EstadosMT(int estadoAtual, char simboloAtual, char novoSimbolo, char movimento, int novoEstado, boolean estadoFinal) {
 
         this.estadoAtual = estadoAtual;
         this.simboloAtual = simboloAtual;
@@ -22,7 +20,6 @@ public class EstadosMT {
         this.movimento = movimento;
         this.novoEstado = novoEstado;
         this.estadoFinal = estadoFinal;
-        this.breakPoint = breakPoint;
     }
 
     public EstadosMT() {
@@ -87,15 +84,6 @@ public class EstadosMT {
     public void setEstadoFinal(boolean estadoFinal) {
 
         this.estadoFinal = estadoFinal;
-    }
 
-    public boolean getBreakPoint(){
-
-        return breakPoint;
-    }
-
-    public void setBreakPoint(boolean breakPoint){
-
-        this.breakPoint = breakPoint;
     }
 }

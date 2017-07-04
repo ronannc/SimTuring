@@ -65,15 +65,6 @@ public class CarregaMT {
                                 estado.setNovoEstado(-1); // quando estado for -1 equivale ao coringa '*'
                             }
 
-                            if (token.countTokens() != 0){
-
-                                aux = token.nextToken();
-
-                                if(aux.equals("!")) // '!' pode ser usado no final da linha para criar um breakpoint.
-
-                                    estado.setBreakPoint(true);
-                            }
-
                         } else{
 
                             estado.setEstadoFinal(true);

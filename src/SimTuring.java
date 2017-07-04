@@ -16,6 +16,8 @@ public class SimTuring {
     private static String palavra;
     private static int limComputacao;
     private static int limThreads;
+    private static boolean tipoDeExecucão;
+    private static String cabesote = "<>";
 
     private static void printaCabesalho(){
 
@@ -26,8 +28,28 @@ public class SimTuring {
 
     public static void main(String[] args) throws IOException {
 
-        //System.out.println("nome do arquivo: m1.mt");
-        //System.out.println(args[1]);
+        /*
+        if(args.length > 2){
+
+            //recebe a configuração da Maquina de Turing
+            MT = CarregaMT.carregaMT(args[3]);
+            if(args[0].equals("-r")){
+                tipoDeExecução=true;
+            }else {
+                tipoDeExecução = false;
+            }
+            cabesote[0] = args[2].charAt(0);
+            cabesote[1] = args[2].charAt(1);
+        }else{
+            //recebe a configuração da Maquina de Turing
+            MT = CarregaMT.carregaMT(args[1]);
+            if(args[0].equals("-r")){
+                tipoDeExecução=true;
+            }else {
+                tipoDeExecução = false;
+            }
+        }
+        */
 
         //recebe a configuração da Maquina de Turing
         MT = CarregaMT.carregaMT("src/m1.mt");

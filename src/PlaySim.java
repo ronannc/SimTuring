@@ -239,6 +239,7 @@ public class PlaySim implements Runnable{
                                 mMT.setFitaClass(auxFitaAtual);
                             }
 
+
                         }else {
 
                             mMT.setFlagParaMT(false);
